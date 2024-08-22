@@ -1,6 +1,6 @@
 # LeetCode Solutions
 
-This repository contains my solutions to various LeetCode problems.
+This repository contains my solutions to various LeetCode problems as well as other platforms such as NeetCode.io and HackerRank
 
 ## Directory Structure
 
@@ -9,6 +9,7 @@ This repository contains my solutions to various LeetCode problems.
 ├── Easy
 ├── Medium
 ├── Hard
+├── HackerRank
 └── README.md
 ```
 
