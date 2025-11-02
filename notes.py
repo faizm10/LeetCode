@@ -26,3 +26,22 @@ class Solution:
         L = self.maxDepth(root.left)
         R = self.maxDepth(root.right)
         return 1 + max(L, R)
+    
+# dfs orders:
+# preroder: root -> left -> right
+# inorder: left -> root -> right
+# postorder: left -> right -> root
+
+#little template:
+def dfs(node):
+    if node is None:
+        return something
+    left = dfs(node.left)
+    right = dfs(node.right)
+
+    #do some logic dependiong on the question
+
+    return result
+
+# bfs level order traversal
+# visit nodees level by level
