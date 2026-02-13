@@ -6,3 +6,4 @@ class Solution:
                 return i
             seen.add(i)
         return -1
+    
