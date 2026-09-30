@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# Auto-PR-and-merge for LeetCode solution commits.
+#
+# When a direct commit on main touches a solution file named
+# "<number>. <title>.<ext>" (the convention this repo already uses), this
+# hook lifts that commit onto a branch, opens a PR titled after the file
+# ("42. Trapping Rain Water"), and squash-merges it into main. Commits that
+# don't touch a solution file (README tweaks, notes, etc.) are left alone.
+#
+# Requires: gh (authenticated), and core.hooksPath=.githooks set locally
+# (run once per clone: git config core.hooksPath .githooks).
+set -uo pipefail
+
+branch="$(git rev-parse --abbrev-ref HEAD)"
+[ "$branch" = "main" ] || exit 0
+
+# skip merge commits and the initial commit (no single parent to diff against)
+parent_count=$(git cat-file -p HEAD | grep -c '^parent ')
+[ "$parent_count" -le 1 ] || exit 0
+git rev-parse HEAD^ >/dev/null 2>&1 || exit 0
+
+# skip commits this hook itself produced (shouldn't happen, but be safe)
+git log -1 --pretty=%B | grep -q '^\[auto-pr\]' && exit 0
+
+commit_sha=$(git rev-parse HEAD)
+parent_sha=$(git rev-parse HEAD^)
+
+solution_files=()
+while IFS= read -r f; do
+  base="$(basename "$f")"
+  if [[ "$base" =~ ^[0-9]+\..+\.[A-Za-z0-9]+$ ]]; then
+    solution_files+=("$f")
+  fi
+done < <(git diff --name-only "$parent_sha" "$commit_sha")
+
+[ "${#solution_files[@]}" -gt 0 ] || exit 0
+
+first="$(basename "${solution_files[0]}")"
+title="${first%.*}"
+slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g' | sed -E 's/^-+|-+$//g')
+branch_name="solution/${slug}"
+
+echo "[auto-pr] detected solution commit: $title"
+
+git branch -f "$branch_name" "$commit_sha"
+git reset --hard "$parent_sha" >/dev/null
+
+if ! git push -u origin "$branch_name" >/tmp/auto-pr-push.log 2>&1; then
+  echo "[auto-pr] push failed, restoring commit on main:"
+  cat /tmp/auto-pr-push.log
+  git reset --hard "$commit_sha" >/dev/null
+  git branch -D "$branch_name" >/dev/null 2>&1
+  exit 0
+fi
+
+pr_url=$(gh pr create --base main --head "$branch_name" --title "$title" --body "" 2>/tmp/auto-pr-create.log)
+if [ -z "$pr_url" ]; then
+  echo "[auto-pr] gh pr create failed (commit is on $branch_name, main is back at parent):"
+  cat /tmp/auto-pr-create.log
+  exit 0
+fi
+echo "[auto-pr] opened $pr_url"
+
+if gh pr merge "$branch_name" --squash --delete-branch >/tmp/auto-pr-merge.log 2>&1; then
+  echo "[auto-pr] merged and deleted $branch_name"
+else
+  echo "[auto-pr] auto-merge failed, PR left open for manual merge:"
+  cat /tmp/auto-pr-merge.log
+  exit 0
+fi
+
+git fetch origin main >/dev/null 2>&1
+git reset --hard origin/main >/dev/null
+echo "[auto-pr] main synced with squashed merge"
