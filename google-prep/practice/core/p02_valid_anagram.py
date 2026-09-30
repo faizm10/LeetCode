@@ -14,7 +14,7 @@ Output: True
 def is_anagram(s, t):
     if len(s) != len(t): #if the length isnt the same, we can return false
         return False
-    return sorted(s) == sorted(t)
+    return sorted(s) == sorted(t) # if the sorted strings are equal, then they are anagrams of each other
 
 
 if __name__ == "__main__":
