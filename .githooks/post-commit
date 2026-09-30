@@ -30,13 +30,29 @@ while IFS= read -r f; do
   base="$(basename "$f")"
   if [[ "$base" =~ ^[0-9]+\..+\.[A-Za-z0-9]+$ ]]; then
     solution_files+=("$f")
+  # google-prep files: "p<nn>_<snake_title>.<ext>"
+  elif [[ "$f" == google-prep/* && "$base" =~ ^p[0-9]+_.+\.[A-Za-z0-9]+$ ]]; then
+    solution_files+=("$f")
   fi
 done < <(git diff --name-only "$parent_sha" "$commit_sha")
 
 [ "${#solution_files[@]}" -gt 0 ] || exit 0
 
-first="$(basename "${solution_files[0]}")"
-title="${first%.*}"
+first_path="${solution_files[0]}"
+first="$(basename "$first_path")"
+if [[ "$first" =~ ^p[0-9]+_ ]]; then
+  # prefer the docstring header ("p02. Valid Anagram (Easy)"), minus difficulty
+  title=$(git show "$commit_sha:$first_path" 2>/dev/null \
+    | grep -m1 -E '^p[0-9]+\. ' | sed -E 's/[[:space:]]*\((Easy|Medium|Hard)\)[[:space:]]*$//')
+  if [ -z "$title" ]; then
+    stem="${first%.*}"
+    num="${stem%%_*}"
+    words=$(echo "${stem#*_}" | tr '_' ' ' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1')
+    title="${num}. ${words}"
+  fi
+else
+  title="${first%.*}"
+fi
 slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g' | sed -E 's/^-+|-+$//g')
 branch_name="solution/${slug}"
 
