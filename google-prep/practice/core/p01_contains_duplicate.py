@@ -12,8 +12,14 @@ Output: True
 
 
 def contains_duplicate(nums):
-    # TODO: implement
-    pass
+    # we want to have a set to keep track and see if there is a duplicate number
+    numbers = set()
+    for i in nums:
+        if i in numbers:
+            return True
+        else:
+            numbers.add(i)
+    return False
 
 
 if __name__ == "__main__":
