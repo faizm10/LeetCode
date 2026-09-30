@@ -12,8 +12,9 @@ Output: True
 
 
 def is_anagram(s, t):
-    # TODO: implement
-    pass
+    if len(s) != len(t):
+        return False
+    return sorted(s) == sorted(t)
 
 
 if __name__ == "__main__":
