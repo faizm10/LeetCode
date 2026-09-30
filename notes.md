@@ -90,3 +90,8 @@ get all values:
 ```python
 my_dict.values()  # dict_values([15, 3, 4])
 ```
+
+# neat tricks
+
+set(): collection of unique items, store multiple items in a single variable and it removes any duplicate items
+useful if we want to see unique numbers, check if there is an item that exists in a collection

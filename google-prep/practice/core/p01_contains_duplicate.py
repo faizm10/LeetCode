@@ -21,7 +21,6 @@ def contains_duplicate(nums):
             numbers.add(i)
     return False
 
-
 if __name__ == "__main__":
     assert contains_duplicate([1, 2, 3, 1]) is True
     assert contains_duplicate([1, 2, 3, 4]) is False
