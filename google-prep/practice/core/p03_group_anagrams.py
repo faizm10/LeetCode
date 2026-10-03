@@ -11,10 +11,19 @@ Output: [["eat","tea","ate"],["tan","nat"],["bat"]]
 """
 
 
-def group_anagrams(strs):
-    # TODO: implement
-    pass
+from numpy import sort
 
+
+def group_anagrams(strs):
+    # we need to sort the strings in a way where if 2 or more strings are anagrams, we put it in group 1.
+    groups = {}
+    for s in strs:
+        sorted_s = ''.join(sorted(s))
+        if sorted_s not in groups:
+            groups[sorted_s] = []
+        groups[sorted_s].append(s)
+
+    return list(groups.values())
 
 def _normalize(groups):
     return sorted(sorted(g) for g in groups)
