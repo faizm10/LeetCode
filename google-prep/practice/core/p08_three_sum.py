@@ -13,8 +13,19 @@ Output: [[-1,-1,2],[-1,0,1]]
 
 
 def three_sum(nums):
-    # TODO: implement
-    pass
+    """
+    sorted_nums = [-4,-1,-1,0,1,2]
+    l = -1
+    r = 2
+    i = -4
+
+    we would wanna start with the index of the loop and use two points to iterate the ones on the left side and right side while skipping duplicates as well
+
+    so first we would stary with the first index of nums, use l to go thru on the left and use r to go on the right. 
+    """
+    
+    
+   
 
 
 def _normalize(triplets):
