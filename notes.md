@@ -95,3 +95,24 @@ my_dict.values()  # dict_values([15, 3, 4])
 
 set(): collection of unique items, store multiple items in a single variable and it removes any duplicate items
 useful if we want to see unique numbers, check if there is an item that exists in a collection
+
+
+# two pointers
+
+```python
+
+left = 0
+right = len(nums)-1
+while left < right:
+    total = nums[left] + nums[right]
+
+    if total == result:
+        return True
+    elif total < result:
+        left +=1
+    else:
+        right -=1
+return False
+
+```
+
