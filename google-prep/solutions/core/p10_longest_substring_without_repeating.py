@@ -12,14 +12,22 @@ Output: 3   ("abc")
 
 
 def length_of_longest_substring(s):
-    last_seen = {}
-    start = 0
+    left = 0
     best = 0
-    for i, c in enumerate(s):
-        if c in last_seen and last_seen[c] >= start:
-            start = last_seen[c] + 1
-        last_seen[c] = i
-        best = max(best, i - start + 1)
+    current = 0
+    duplicate = set()
+    for right in range(len(s)):
+            # right = 0, 
+            
+        if s[right] not in duplicate:
+            duplicate.add(s[right])
+            current+=1
+        else:
+            best = max(best,current)
+            duplicate.discard(s[left])
+            duplicate.add(s[right])
+            left+=1
+            
     return best
 
 
