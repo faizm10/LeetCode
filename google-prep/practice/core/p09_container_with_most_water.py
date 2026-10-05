@@ -13,8 +13,19 @@ Output: 49
 
 
 def max_area(height):
-    # TODO: implement
-    pass
+    l = 0
+    r = len(height) - 1
+    max_area = 0
+    while l < r:
+        h = min(height[l], height[r])
+        width = r - l
+        area = width * h
+        max_area = max(max_area, area)
+        if height[l] < height[r]:
+            l += 1
+        else:
+            r -= 1
+    return max_area
 
 
 if __name__ == "__main__":
