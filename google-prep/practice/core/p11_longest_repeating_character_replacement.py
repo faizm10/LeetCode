@@ -13,8 +13,21 @@ Output: 4
 
 
 def character_replacement(s, k):
-    # TODO: implement
-    pass
+    left = 0
+    count = {}
+    best = 0
+
+    for right in range(len(s)):
+        count[s[right]] = count.get(s[right], 0) + 1
+
+        most_common = max(count.values())
+
+        if (right - left + 1 - most_common) > k:
+            count[s[left]] -= 1
+            left += 1
+        else:
+            best = max(right - left + 1, best)
+    return best
 
 
 if __name__ == "__main__":
