@@ -17,17 +17,12 @@ def length_of_longest_substring(s):
     current = 0
     duplicate = set()
     for right in range(len(s)):
-            # right = 0, 
             
-        if s[right] not in duplicate:
-            duplicate.add(s[right])
-            current+=1
-        else:
-            best = max(best,current)
+        while s[right] in duplicate:
             duplicate.discard(s[left])
-            duplicate.add(s[right])
-            left+=1
-            
+            left +=1
+        duplicate.add(s[right])
+        best = max(best, right - left + 1)
     return best
 
 
