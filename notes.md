@@ -93,26 +93,49 @@ my_dict.values()  # dict_values([15, 3, 4])
 
 # neat tricks
 
-set(): collection of unique items, store multiple items in a single variable and it removes any duplicate items
-useful if we want to see unique numbers, check if there is an item that exists in a collection
+**set()**: collection of unique items. stores multiple items in a single variable and removes any duplicates.
 
+- useful if we want to see unique numbers
+- useful to check if an item exists in a collection
 
 # two pointers
 
 ```python
-
 left = 0
-right = len(nums)-1
+right = len(nums) - 1
 while left < right:
     total = nums[left] + nums[right]
 
     if total == result:
         return True
     elif total < result:
-        left +=1
+        left += 1
     else:
-        right -=1
+        right -= 1
 return False
-
 ```
 
+# sliding window
+
+we use it when we care about a **continuous section** of an array or string.
+
+- **fixed-size window**: window stays the same size.
+  - example: "maximum sum of 3 consecutive numbers"
+- **variable-size window**:
+  - right → expands the window
+  - left → shrinks the window when needed
+  - example: "longest substring without duplicates"
+
+python template:
+```python
+left = 0
+
+for right in range(len(nums)):
+    # expand window
+
+    while window_is_bad:
+        # shrink window
+        left += 1
+
+    # update answer
+```
