@@ -5,7 +5,7 @@
 1. [big o](#big-o)
 2. [arrays](#arrays)
 3. [strings](#strings)
-4. [hashing (dictionaries)](#hashing-dictionaries)
+4. [hashmaps (dictionaries)](#hashmaps-dictionaries)
 5. [sets](#sets)
 6. [two pointers](#two-pointers)
 7. [sliding window](#sliding-window)
@@ -210,58 +210,194 @@ for char in s:
 s == s[::-1]
 ```
 
-## hashing (dictionaries)
+## hashmaps (dictionaries)
 
-hashing is a way to quickly find items in a collection. it uses a hash function ("secret formula") to compute a unique index (or "hash") for each item.
+a hashmap stores **key → value** pairs. in python it's called a `dict`.
 
-- **direct access**: with the hash function, you can jump straight to where an item lives, so lookups are fast.
-- **use case**: hashing is great when you need to look up items in a big collection a lot. that's why hash tables use it, for fast access to data.
+it runs each key through a hash function ("secret formula") that turns the key into a spot in memory. so instead of searching through every item, it jumps straight to the right spot. that's why lookups are fast.
 
-### create a dictionary
+> **the big idea:** a hashmap trades memory for speed. you spend O(n) space to turn an O(n) search into an O(1) lookup. most "make this faster than O(n²)" problems are solved this way.
+
+### how fast is it?
+
+| operation | time |
+|---|---|
+| look up a key | O(1) |
+| add / update a key | O(1) |
+| delete a key | O(1) |
+| check `key in d` | O(1) |
+| loop over everything | O(n) |
+
+O(1) here is on average. it's almost always true in practice, so treat it as O(1) in interviews.
+
+### basics
+
 ```python
-my_dict = {'apple': 1, 'banana': 2, 'cherry': 3}
+d = {"apple": 1, "banana": 2}   # create
+d = {}                          # empty dict
+
+d["cherry"] = 3       # add
+d["apple"] = 10       # update (same syntax as add)
+d["banana"]           # access → 2
+del d["apple"]        # remove (error if the key isn't there)
+d.pop("banana")       # remove and give back the value → 2
+d.pop("zzz", None)    # remove, no error if missing
+
+len(d)                # number of keys
+"cherry" in d         # True (checks keys, not values)
 ```
 
-### access an item
+### looping
+
 ```python
-my_dict['banana']  # 2
+for key in d:                  # keys
+for value in d.values():       # values
+for key, value in d.items():   # both (use this most)
 ```
 
-### add item
+since python 3.7, dicts remember the order you added keys in.
+
+### safe lookups (no KeyError)
+
+`d["missing"]` crashes with a `KeyError`. use these instead:
+
 ```python
-my_dict['date'] = 4
+d.get("missing")        # None
+d.get("missing", 0)     # 0 (your default)
+
+# count something without checking first
+count[x] = count.get(x, 0) + 1
 ```
 
-### remove item
+### defaultdict (auto-creates missing keys)
+
 ```python
-del my_dict['apple']  # {'banana': 2, 'cherry': 3, 'date': 4}
+from collections import defaultdict
+
+count = defaultdict(int)     # missing keys start at 0
+count["a"] += 1              # no need to check first
+
+groups = defaultdict(list)   # missing keys start as []
+groups["fruit"].append("apple")
 ```
 
-### update item
+use `int` for counting, `list` for grouping, `set` for grouping without duplicates.
+
+### Counter (counts things for you)
+
 ```python
-my_dict['banana'] = 15  # {'banana': 15, 'cherry': 3, 'date': 4}
+from collections import Counter
+
+c = Counter("banana")     # {'a': 3, 'n': 2, 'b': 1}
+c["a"]                    # 3
+c["z"]                    # 0 (missing keys give 0, no error)
+c.most_common(2)          # [('a', 3), ('n', 2)]
+
+Counter("listen") == Counter("silent")  # True, same letters
 ```
 
-### iterate
+### what can be a key?
+
+keys must be **immutable** (they can't change).
+
+| ✅ allowed | ❌ not allowed |
+|---|---|
+| `int`, `str`, `float`, `bool` | `list` |
+| `tuple` (if everything inside is immutable) | `dict` |
+| `frozenset` | `set` |
+
+need a list as a key? turn it into a tuple first: `d[tuple(my_list)] = ...`
+
+### sorting a dict
+
 ```python
-# go through the dictionary and print each key-value pair
-for key, value in my_dict.items():
-    print(key, value)
-# output:
-# banana 15
-# cherry 3
-# date 4
+sorted(d)                                    # keys, sorted
+sorted(d.items(), key=lambda kv: kv[1])      # pairs, by value (smallest first)
+sorted(d.items(), key=lambda kv: -kv[1])     # pairs, by value (biggest first)
+max(d, key=d.get)                            # key with the biggest value
 ```
 
-### get all keys
+### common pattern (two sum: "have I seen what I need?")
+
+store each number's index as you go. for every new number, check if its partner is already in the map.
+
 ```python
-my_dict.keys()  # dict_keys(['banana', 'cherry', 'date'])
+def two_sum(nums, target):
+    seen = {}                        # number → index
+    for i, num in enumerate(nums):
+        need = target - num
+        if need in seen:
+            return [seen[need], i]
+        seen[num] = i
 ```
 
-### get all values
+O(n) instead of O(n²) for two loops.
+
+### common pattern (count frequencies)
+
 ```python
-my_dict.values()  # dict_values([15, 3, 4])
+count = {}
+for x in nums:
+    count[x] = count.get(x, 0) + 1
+
+# or just: count = Counter(nums)
 ```
+
+used in: valid anagram, first unique character, majority element.
+
+### common pattern (group by a key)
+
+pick something that's the **same for every item in a group**, and use it as the key.
+
+```python
+# group anagrams: "eat", "tea", "ate" all sort to "aet"
+groups = defaultdict(list)
+for word in words:
+    key = "".join(sorted(word))     # or tuple of 26 letter counts
+    groups[key].append(word)
+return list(groups.values())
+```
+
+### common pattern (top k frequent, bucket sort)
+
+```python
+count = Counter(nums)
+buckets = [[] for _ in range(len(nums) + 1)]   # index = frequency
+for num, freq in count.items():
+    buckets[freq].append(num)
+
+result = []
+for freq in range(len(buckets) - 1, 0, -1):    # highest frequency first
+    for num in buckets[freq]:
+        result.append(num)
+        if len(result) == k:
+            return result
+```
+
+O(n). the easier version is `[x for x, _ in Counter(nums).most_common(k)]`, which is O(n log n).
+
+### common pattern (prefix sum + hashmap)
+
+count subarrays that add up to `k`. see [prefix sums](#prefix-sums) for the full version. the trick is storing **how many times** each running sum has appeared:
+
+```python
+seen = {0: 1}     # running sum → how many times we've seen it
+```
+
+### common mistakes
+
+- reading a missing key with `d[key]` → use `d.get(key, default)` or `defaultdict`
+- changing a dict while looping over it → loop over `list(d)` instead
+- using a list as a key → convert it to a `tuple`
+- `{}` is an empty **dict**, not an empty set → use `set()`
+- `x in d` checks keys only → use `x in d.values()` for values (that one is O(n))
+
+### hashmap vs set
+
+| use a... | when you need |
+|---|---|
+| set | "have I seen this?" (yes / no) |
+| hashmap | "have I seen this, **and** what do I know about it?" (index, count, list...) |
 
 ## sets
 
@@ -1075,7 +1211,7 @@ class Trie:
 
 | if the problem says... | try |
 |---|---|
-| "have I seen this before?" / count things | hashing, sets |
+| "have I seen this before?" / count things | hashmaps, sets |
 | sorted array, find a pair | two pointers |
 | longest / shortest **continuous** subarray or substring | sliding window |
 | sum of a range, subarrays that add up to k | prefix sums |
