@@ -8,10 +8,10 @@ class Solution:
                 length = 1
                 current = num
 
-                while num+1 in numbers:
-                    current = num+1
+                while current + 1 in numbers:
                     current += 1
                     length += 1
 
-                longest = max(longest,length)
+                longest = max(longest, length)
+
         return longest
